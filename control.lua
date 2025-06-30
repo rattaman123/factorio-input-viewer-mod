@@ -4,10 +4,6 @@ mod_name="InputViewer"
 if not global then global = {} end
 global.assembler_renderings = global.assembler_renderings or {}
 
-local function is_assembler(entity)
-    return entity and entity.type == "assembling-machine"
-end
-
 local function clear_assembler(entity)
     if global.assembler_renderings[entity.unit_number] then
         for _, render in pairs(global.assembler_renderings[entity.unit_number]) do
@@ -67,13 +63,24 @@ local function decorate_assembler(entity)
     end
 end
 
--- Handle new assemblers
-script.on_event(defines.events.on_built_entity, function(event)
+local function is_assembler(entity)
+    return entity.type == "assembling-machine"
+end
 
-    local entity = event.created_entity
+local function decorate_if_assembler(entity)
     if is_assembler(entity) then
         decorate_assembler(entity)
     end
+end
+
+-- Handle new assemblers
+script.on_event(defines.events.on_built_entity, function(event)
+    decorate_if_assembler(event.entity)
+end)
+
+-- Handle pasting settings
+script.on_event(defines.events.on_entity_settings_pasted, function(event)
+    decorate_if_assembler(event.destination)
 end)
 
 -- Handle assemblers being removed
@@ -84,10 +91,14 @@ script.on_event({defines.events.on_entity_died, defines.events.on_player_mined_e
     end
 end)
 
+-- Handle potential recipe change
+script.on_event(defines.events.on_gui_closed, function(event)
+    decorate_if_assembler(event.entity)
+end)
+
 -- Initialize for existing assemblers (new game or mod enabled)
 script.on_init(function()
-
-    game.print(mod_name .. " initialized")
+    game.print("Initialized mod " .. mod_name)
 
     global.assembler_renderings = {}
     for _, surface in pairs(game.surfaces) do
@@ -99,6 +110,8 @@ end)
 
 -- Handle existing assemblers in saved games or mod updates
 script.on_configuration_changed(function(data)
+    game.print("Configuration changed for mod " .. mod_name)
+
     global.assembler_renderings = global.assembler_renderings or {}
     for _, surface in pairs(game.surfaces) do
         for _, entity in pairs(surface.find_entities_filtered{type = "assembling-machine"}) do
@@ -109,18 +122,18 @@ script.on_configuration_changed(function(data)
     end
 end)
 
-script.on_event(defines.events.on_selected_entity_changed, function(event)
-    -- Get the player who triggered the event
-
-    local player = game.players[event.player_index]
-
-    -- Check if the player has selected an entity
-    if player.selected then
-
-        rendering.clear(mod_name)
-        local entity = player.selected
-        if is_assembler(entity) then
-            decorate_assembler(entity)
-        end
-    end
-end)
+--script.on_event(defines.events.on_selected_entity_changed, function(event)
+--    -- Get the player who triggered the event
+--
+--    local player = game.players[event.player_index]
+--
+--    -- Check if the player has selected an entity
+--    if player.selected then
+--
+--        rendering.clear(mod_name)
+--        local entity = player.selected
+--        if is_assembler(entity) then
+--            decorate_assembler(entity)
+--        end
+--    end
+--end)

@@ -1,1 +1,1 @@
-Compress-Archive -Force ..\InputViewer\  ..\InputViewer_0.1.0.zip
+Compress-Archive -Force ..\InputViewer\  ..\InputViewer_0.2.0.zip
