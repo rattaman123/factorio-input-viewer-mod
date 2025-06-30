@@ -1,0 +1,8 @@
+{
+  "name": "InputViewer",
+  "version": "0.1.0",
+  "title": "Assembler Input Viewer",
+  "author": "zestriddle",
+  "description": "Shows required inputs on assemblers",
+  "factorio_version": "2.0"
+}
